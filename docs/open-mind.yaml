@@ -1,0 +1,36 @@
+project: iq-locker
+repo: iq-locker
+type: open-ended
+docs:
+  brief: docs/brief.md
+  discovery-log: docs/discovery-log.md
+  sessions: docs/sessions/
+  captures: docs/captures.md
+tracked_files:
+  - CLAUDE.md
+  - docs/open-mind.yaml
+  - docs/brief.md
+  - docs/captures.md
+  - docs/discovery-log.md
+  - docs/sessions/*.md
+  - docs/plans/*.md
+  - README.md
+  - SKILL-LOCKER-PATTERN.md
+  - stripe-minions.md
+  - stripe-minions-2.md
+tags:
+  - agents
+  - skills
+  - framework
+  - research
+execution:
+  backend: task-tool
+  max_parallel: 6
+  quality_gate: full
+  review_escalation:
+    files_threshold: 8
+    lines_threshold: 500
+    security_patterns:
+      - "**/auth/**"
+      - "**/crypto/**"
+      - "**/permissions/**"
