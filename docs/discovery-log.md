@@ -58,3 +58,54 @@ None this session. A couple of earlier framings were corrected mid-session:
 3. Brief Q9 (SKILL.md front-matter metadata for Claude Flow integration) remains open — may resolve during Phase 2 build or defer to Phase 4 (extract reusable scaffolding)
 4. Whether `scripts/vendor-into.sh` should be shell or Node (lean: shell for first build)
 5. How Phase 3 (reconcile consumer projects) interacts with each consumer's existing session history and git conventions
+
+---
+
+## 2026-04-11 — Phase 2 Partial: IQ Design System Locker Build — Waves 1–4
+**Phase context:** `/om-exec` on `docs/plans/iq-design-system-build-plan.md`. 18 of 19 tasks executed across Waves 1–4. Wave 5 (wire) + Wave 6 (validation spawn test) deferred to next session as a natural content-vs-wiring boundary.
+**Session log:** `sessions/2026-04-11-iq-design-locker-build.md`
+
+### Discoveries
+
+#### Third drift hunk in `iq-tokens.css` — hardcoded `--iq-color-info: #3B82F6` in iq-publish
+The prior brand audit tracked the teal/indigo accent drift but did not catch that iq-publish's 2026-03-28 rewrite also hardcoded `--iq-color-info: #3B82F6`, severing the semantic info ↔ accent linkage. Booking-module preserved `--iq-color-info: var(--iq-accent)` — the correct theming contract. Task 2's structured diff report surfaced it as a third unrecorded drift hunk within the same diff hunk region as the indigo accent rewrite.
+- **Downstream:** This single discovery drove the Wave 2 base-selection reversal (the user explicitly overrode build-plan pre-decision #4 to base `core/iq-tokens.css` on booking-module instead of iq-publish). Every Wave 2+ canonical content depends on this reversal. It also changed Phase E's approach to iq-publish migration: the locker core no longer carries the hardcode, so iq-publish must preserve its defensive fix as a local one-line override in `src/app/globals.css` or lose its tenant-branding guard. Documented in `KGiQ-LLC/iq-design-locker/LINEAGE.md` §2.2 and §3.2.
+
+#### portfolio-front-end's booking widget is a real runtime consumer of `--iq-color-info`
+Task 10's consumer-delta investigation found that `portfolio-front-end/public/vendor/booking-widget.js` uses `var(--iq-color-info)` for info-chip background and border. It currently resolves to `#3B82F6` — iq-publish's defensive hardcode cascaded by accident because portfolio-front-end copied iq-publish's vendored CSS byte-identically. After Phase E migration to the locker, `--iq-color-info` reverts to `var(--iq-accent)` = gold (KGiQ parent). **Guaranteed visible UI shift** in the embedded booking widget.
+- **Downstream:** Portfolio-front-end's Phase E migration bumps from M to L effort class — the only migration in Phase E with a visible behavior change. Requires a visual regression pass on the booking widget. Prior brand audit assumed the `--iq-color-info` drift was iq-publish-only; it transitively affects any consumer that byte-copied iq-publish's vendored CSS. Future audits should grep for `--iq-color-info` across ALL consumers, not just the projects with their own iq-tokens.css. Documented in `KGiQ-LLC/iq-design-locker/LINEAGE.md` §3.3.
+
+#### Brief has a second stale datum beyond the Three-Layer Token Model
+Task 12's spec verification found that `docs/iq-design-system-brief.md` "Surface Rules" table cites dark-surface values (`#424245 / #545458`) that match neither the authoring spec nor the locker core. The brief was last updated 2026-03-25 and carries booking-specific dark values that don't generalize to the multi-product canonical model. The pre-build brand audit flagged only the Three-Layer Token Model drift at line 25 (`--iq-accent = FIXED...`); this is a second one.
+- **Downstream:** Brief update work item (Phase E) has two bullets now, not one. Brief update may be worth bundling with iq-publish's Phase E migration since that's where the brief originated. Non-blocking for Phase D closeout. Documented in LINEAGE §5.2 and §5.5 D8.
+
+#### Structural validation is a sufficient substitute for `npm test` in content/docs lockers
+The build ran without any unit tests — iq-locker and KGiQ-LLC/iq-design-locker are content/docs repos. Structural substitutes (CSS brace balance, YAML frontmatter validation, SKILL.md structure checks, shasum byte-compare for verbatim files, `bash -n` + end-to-end smoke test for the shell script) caught every real issue across 8 review cycles without any escape. The "fix all suggestions and re-review until clean" policy amplified this — every cycle 2 review passed cleanly after cycle 1 fixes.
+- **Downstream:** Consider codifying structural-validation-in-lieu-of-tests as a canonical iq-locker framework pattern for content-only lockers. Phase 4 (extract reusable framework scaffolding) candidate. Reduces the "what counts as tests?" decision overhead for every future locker build.
+
+#### LINEAGE.md format works as a quality gate, not just a provenance record
+The cycle 1 code review of Wave 3 caught multiple factual errors in LINEAGE.md (swapped teal/indigo family labels on the publish/booking rows, wrong KGiQ base hex `#D4A84B` instead of `#FFD166` cited in two places) that would have silently propagated into consumer documentation. The reviewer used LINEAGE as cross-reference ground truth — which ironically was the same doc under review. This worked because LINEAGE's per-file provenance table made every claim greppable against reality.
+- **Downstream:** LINEAGE.md is more than an audit trail — it's load-bearing infrastructure for future code-review cycles against the locker. The format deserves promotion to a framework template (A12 assumption validated this session). Future lockers should inherit the same 6-section structure: provenance / drift / consumer delta / completeness / spec verification / quality-gate history.
+
+#### Vendor script `--accent` must be required to structurally block the parent-layer-without-accent footgun
+Pre-decision #5 moved `--iq-product-accent` out of `parent-layer/iq-site-tokens.css` and into the accent files. A consumer vendoring `parent-layer/` alone would lose `--iq-product-accent`, breaking the dot-as-signature system. Task 16's `vendor-into.sh` makes `--accent` a required CLI flag — exit code 2 if missing — which structurally prevents the script-based path from hitting the footgun. Hand-copy workflows are still at risk, which is why LINEAGE §5.7 tracks adding a guard comment to `parent-layer/iq-site-tokens.css` as a Phase E precursor.
+- **Downstream:** Confirms that for architectural dependencies between locker files, **CLI flag requirements are a legitimate enforcement mechanism**. Framework pattern: any locker with cross-file dependencies should bake enforcement into its vendor script via required flags. Alternative (documentation alone) is insufficient.
+
+### Assumptions Validated
+
+- [A3] Skill locker pattern generalizes from vendored-upstream to self-authored content (partially — build worked cleanly; drift reconciliation was harder than vendored-upstream but manageable)
+- [A9] Native Claude Code SKILL.md format is the correct content format (all 8 skills written with valid frontmatter, descriptions under 250 chars, front-loaded trigger keywords)
+- [A11] Locker lives at KGiQ-LLC/iq-design-locker/ and IS canonical (build landed there, session-separation convention worked cleanly)
+- [A12] LINEAGE.md backwards-looking audit is a structural quality gate (validated strongly — LINEAGE caught factual errors during cycle 1 code review that would have silently propagated)
+
+### Assumptions Invalidated
+
+None this session.
+
+### Open Questions
+
+1. Task 19's spawn discoverability test — success bar (one pass vs 2-3 variants for flakiness reduction)?
+2. Whether to fold the `parent-layer/iq-site-tokens.css` guard comment (Phase E precursor) into Wave 5 or defer to Phase E proper
+3. Whether the brief update (D7 + D8) is its own mini-phase or bundled with iq-publish Phase E migration
+4. How to handle the widget-tokens.css Shadow DOM re-projection — locker ships a sample regeneration script, or consumer owns it entirely?
+5. Whether the structural-validation-in-lieu-of-tests pattern should be promoted to an iq-locker framework convention (Phase 4 candidate)
