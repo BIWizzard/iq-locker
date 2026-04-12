@@ -164,3 +164,70 @@ None this session.
 2. **Should the iq-locker framework codify "every MANIFEST should have a 'When to consult LINEAGE' section" as a pattern?** The discoverability improvement from §6 was meaningful and would benefit all future locker instances.
 3. **How should the locker handle its byte-for-byte copy of `branding/guidelines.md`?** Currently manual sync; options include symlinks, pointer docs, or a sync test. Not urgent but worth solving at the framework level before the next locker instance is built.
 4. **When Wave 6 Task 19 (spawn discoverability test) runs next session, should the success criteria be updated to verify the subagent finds `iq-brand-system.md` via SKILL routing?** The original criteria only mention MANIFEST and SKILL.md files. The new source-of-truth doc is a natural target to verify.
+
+---
+
+## 2026-04-12 — Phase 2 Closure: Wave 5-6 Wiring + Plan Cleanup + Spawn Discoverability Test
+**Phase context:** Phase 2 (Build first-instance IQ Design System Locker) — **closed**. Executed Tasks 17, 18, 19 from the 19-task build plan. User-directed mid-session pivots into legacy-path cleanup (build plan + brand audit) and stale Brand Standards remediation in the parent CLAUDE.md. Spawn test passed first try; 3 content gaps surfaced for a dedicated closure session before Phase E.
+**Session log:** `sessions/2026-04-12-phase-2-closure.md`
+
+### Discoveries
+
+#### Top-of-file pointer banners on historical docs must live in the doc being read, not in a sibling
+Last session's decision was to preserve the build plan's historical task text and rely on `LINEAGE.md §7.9` path resolution. That works only for readers who already know to consult LINEAGE — an agent opening the build plan cold has no pointer at all. This session overrode that decision and added an "AS-BUILT AMENDMENT" banner at the top of the build plan (5 numbered deltas) and a shorter "AS-BUILT POINTER" at the top of the sibling brand audit doc, each redirecting to LINEAGE §7 and the build plan amendment.
+- **Downstream:** Framework pattern to codify at Phase 4: *"Wherever historical docs are preserved, a pointer banner must live at the top of the historical doc itself — not elsewhere."* Generalizes to every future locker that maintains historical planning artifacts. Open Question #4 below picks this up.
+
+#### The spawn discoverability test empirically validates Assumption [A1] with direct evidence for the first time
+Prior A1 validation was indirect (T3 Hearst POC, Claude Flow audit, Claude Code native audit). This session produced a direct, reproducible test: a blank-slate general-purpose subagent with zero prior knowledge of the locker, given only a button-variant design task in KGiQ-LLC, found the canonical source of truth in 3 reads via `CLAUDE.md` → `MANIFEST.md` → `docs/iq-brand-system.md`, explicitly read `iq-components/SKILL.md` binding rules before acting, and refused to use `--iq-accent` for interactive elements (cited §2 token routing rules). The subagent's own verdict: *"The routing from CLAUDE.md → MANIFEST.md → docs/iq-brand-system.md is excellent — a fresh agent can land on the source of truth in 3 reads."*
+- **Downstream:** This is now the gold standard test pattern for any future locker instance. Phase 4 candidate: codify "every locker instance passes a domain-specific spawn discoverability test as its structural quality gate."
+
+#### SKILL.md binding rules actively steer subagent behavior, not just document intent
+The Task 19 subagent found `iq-components/SKILL.md` said *"The canonical component set is the source of truth — don't invent variants without updating `docs/iq-brand-system.md` section 6."* It then surfaced this as a scope concern, delivered a fully-resolved version of the existing Secondary variant instead of inventing a new one, and flagged in its ambiguity section that "new secondary variant" could mean three different things. The binding rule wasn't just read — it constrained output behavior.
+- **Downstream:** Framework pattern: *"SKILLs that enforce scope discipline should use explicit binding language that agents can cite."* Extract to `SKILL-LOCKER-PATTERN.md` as guidance for future SKILL.md authors.
+
+#### Parent-layer fill-token override gap — unresolved ambiguity about runtime theme assumption
+`parent-layer/iq-site-tokens.css` overrides `--iq-color-surface-*` and text colors but NOT `--iq-color-fill-secondary` / `--iq-color-fill-tertiary`. In dark-first context the inherited light-mode values (`#F5F5F7`, `#EBEBED`) would glare on a slate-900 canvas. Either a real bug (parent layer should override fill tokens) or an implicit assumption that `data-theme="dark"` is set at runtime. Docs alone cannot resolve which. The spawn test subagent flagged it as an ambiguity rather than guessing.
+- **Downstream:** Gap 1 action item in `docs/plans/2026-04-12-locker-gap-closure.md`. ~15 minutes investigation of how the KGiQ parent site initializes theme. Must be resolved before Phase E consumer migrations — otherwise consumers would inherit the ambiguity.
+
+#### `iq-brand-system.md §6` is thin on concrete button specifics
+§6 defines button hierarchy (5 variants) and token routing (fill, text, radius, focus ring, press transform) but does not specify padding, font-size, font-weight, hover background, hover text. The spawn test subagent had to fall back to `docs/history/iq-components-guide.md` (archived/legacy) for values — `padding: 8px 16px`, `font-size: 14px`, `font-weight: 500`. Legacy values map cleanly to existing canonical tokens (`--iq-space-2`, `--iq-space-4`, `--iq-type-body-emphasis-*`).
+- **Downstream:** Gap 2 action item. Promote legacy values into §6 with canonical token routing so future consumers don't need to consult `docs/history/`. ~30-45 min with design review on hover rules. Must be resolved before Phase E.
+
+#### Possible "Secondary = Steel Blue" regression from legacy guide
+Legacy `iq-components-guide.md` documents Secondary as "Steel Blue `#5E7F9B` + White" which maps to `--iq-tint-base` on the parent site (varying by product on Booking/Publish/Circle). Canonical §6 routes Secondary to `--iq-color-fill-secondary` (neutral fill). These are fundamentally different design intents. Either §6 intentionally dropped the tinted pattern (consistent with §2's "interactive = tint, not accent" rule, possibly favoring neutral fills for Primary/Secondary hierarchy) or §6 accidentally dropped it during the 2026-04-12 consolidation rewrite.
+- **Downstream:** Gap 3 action item. Confirm intent with design owner. Directly affects `iq-circle` front-end work currently in progress. Must be resolved before Phase E.
+
+#### KGiQ-LLC had never committed the 3-session locker build — framework gap in `/om-wrap`
+Last session's wrap committed iq-locker (session logs, brief, plans) but not KGiQ-LLC, where the actual locker content lives. Today's session status check surfaced that all ~130 files of locker content were sitting untracked in the KGiQ-LLC working tree across 3 sessions. Resolved for this session via a single 134-file catch-up commit with a multi-section body. But the pattern will re-emerge for any future locker that writes to a different repo than where its framework memory lives.
+- **Downstream:** Framework enhancement for Phase 4: `/om-wrap` should detect working-tree state in project-related external repos and prompt for commits there too. Alternative: each locker instance declares its "write target" repos in its registry entry and wrap iterates. Open Question #5 below.
+
+#### VENDOR-PIN in iq-circle references a commit that doesn't contain the locker
+`iq-circle/iq-design-locker-vendor/VENDOR-PIN` is pinned at commit `72d9a55` — that was the KGiQ-LLC HEAD at vendoring time (earlier 2026-04-12), but it predates the locker being committed in git (which happened this session in `ab863d7`). So the VENDOR-PIN references a commit that cannot resolve the locker files via `git show`. Re-vendoring or auditing the pin would fail.
+- **Downstream:** Framework bug to fix: update the VENDOR-PIN to `ab863d7` or a post-gap-closure commit. Add a pre-vendor check to `vendor-into.sh` refusing to vendor if the locker isn't committed upstream. Open Question #6 below.
+
+#### Git rename detection kept massive reorganizations clean when staged as a unit
+The 2026-04-12 branding consolidation (archive/, v1-archive/, logos/exports/, logos reorganization) initially showed 60+ file deletions + additions in `git status`. After staging with `git add -A branding/`, git auto-detected that most "deletions" were byte-identical to the new files and reclassified them as renames (`R`), preserving blame/history across the reorg. Worth knowing for future multi-file content moves.
+- **Downstream:** Framework pattern: *"For content/docs work that involves large reorganizations, stage via `git add -A <dir>` rather than individual paths to leverage rename detection."* Non-critical but worth noting in framework docs.
+
+### Assumptions Validated
+
+- **[A1]** MANIFEST-read protocol necessary — **validated with direct evidence** via spawn discoverability test (previously indirect). This is now the strongest A1 validation.
+- **[A3]** Skill locker pattern generalizes — **reinforced**. Locker absorbed Wave 5-6 wiring cleanly with no structural issues.
+- **[A9]** Native Claude Code SKILL.md format is correct content format — **reinforced**. Two new CLAUDE.md entry-point files (parent + mid-tree anchor) integrated cleanly with auto-loading.
+- **[A11]** Locker at `KGiQ-LLC/iq-design-locker/` is canonical — **fully validated**. Spawn test spawned in KGiQ-LLC, discovered the locker, navigated via MANIFEST, read canonical source of truth. Entire canonical-source claim held up empirically.
+- **[A12]** LINEAGE.md is a structural quality gate — **reinforced with §8 addition**. Continues to be the authoritative source for "what happened to this locker" across sessions.
+- **[A-new from 2026-04-11]** Structural validation is sufficient substitute for `npm test` in content/docs lockers — **strongly reinforced**. Spawn test IS the structural test. Passed first try with zero escapes. Phase 4 candidate: promote to first-class framework pattern.
+
+### Assumptions Invalidated
+
+None this session.
+
+### Open Questions
+
+1. **Framework pattern: "preserved historical docs need in-place pointer banners, not sibling redirects."** Should this be extracted to `SKILL-LOCKER-PATTERN.md` as a first-class pattern for future lockers? Meaningful discoverability improvement from this session's work on the build plan and brand audit.
+2. **Framework pattern: "spawn discoverability test as structural quality gate."** Every future locker instance should probably have to pass a domain-specific spawn test. The pattern is empirically decisive and takes ~2 minutes of subagent time. Phase 4 candidate.
+3. **Framework pattern: "SKILL.md binding language actively constrains subagent behavior."** Extract to `SKILL-LOCKER-PATTERN.md` as guidance: *"SKILLs enforcing scope discipline should use explicit binding language the agent can cite."* Low-urgency but worth capturing.
+4. **Should `/om-wrap` detect working-tree state in project-related external repos?** This session's catch-up fix worked, but the pattern will re-emerge for any future locker that writes to a different repo than where its framework memory lives. Options: (a) `/om-wrap` auto-detects and prompts, (b) each locker instance declares its "write target" repos in the registry, (c) leave it to the user to remember. (a) is cleanest.
+5. **Should `vendor-into.sh` gain a pre-vendor check refusing vendoring if the locker isn't committed upstream?** iq-circle's VENDOR-PIN references a commit that doesn't contain the locker — a real framework bug. A pre-vendor check would prevent the class of issues.
+6. **iq-circle VENDOR-PIN update** — mechanical fix (`72d9a55` → `ab863d7` or later) but needs to happen before the next iq-circle vendoring. Could be bundled with the gap closure session or a separate framework-hardening task.
+7. **Phase E migration order re-verification.** `LINEAGE §3.4` recommends iq-publish → booking-module → portfolio-front-end. The 2026-04-12 cross-app drift report confirms this ordering but should be verified again after the 3 locker gaps are closed (some of the gap closures may affect consumer migration scope).
