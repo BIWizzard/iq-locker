@@ -109,3 +109,58 @@ None this session.
 3. Whether the brief update (D7 + D8) is its own mini-phase or bundled with iq-publish Phase E migration
 4. How to handle the widget-tokens.css Shadow DOM re-projection — locker ships a sample regeneration script, or consumer owns it entirely?
 5. Whether the structural-validation-in-lieu-of-tests pattern should be promoted to an iq-locker framework convention (Phase 4 candidate)
+
+---
+
+## 2026-04-12 — Phase 2 Detour: Design System Consolidation
+**Phase context:** Phase 2 (Build first-instance locker) — still in progress; major consolidation pass between Waves 1-4 (done) and Waves 5-6 (deferred)
+**Session log:** `sessions/2026-04-12-design-system-consolidation.md`
+
+### Discoveries
+
+#### Cross-app drift between iQ Booking and iQ Publish is significant and not visible from the spec alone
+A thorough audit of how the iQ design system is actually implemented in both apps surfaced multiple drift items that the spec and locker docs don't capture. iQ Publish has `--iq-color-info: #3B82F6` hardcoded (the exact issue that drove the Wave 1 base-selection reversal — it was never fixed in Publish itself), and iQ Publish is missing both Plus Jakarta Sans and JetBrains Mono from its font loading, so all headings silently fall back to system UI. iQ Booking has a calendar page badge hardcoded with Slate-800 colors that will not adapt to light mode, and its `glassCard` pattern is applied to L1 cards which may violate the 2026-03-29 panel decision. Full audit captured in `docs/plans/2026-04-12-cross-app-drift-report.md`.
+- **Downstream:** Direct impact on Phase E consumer migration work. iq-publish migration (currently "S" effort) grows to include font loading work and the hardcode fix. booking-module migration needs the calendar badge tokenization and a glass policy re-evaluation. Recommended migration order from LINEAGE §3.4 still stands (iq-publish → booking-module → portfolio-front-end). Adds urgency to Phase E: the apps can only drift further until they're reconciled to vendor from the locker.
+
+#### Canonical Figma product accent map has 5 reserved colors for future products
+The session surfaced a Figma artifact that contains the complete product accent registry: KGiQ gold, iQ Booking teal, iQ Publish indigo, iQ Circle rose (active), plus Menu red (#EF4444), Family Finance green (#22C55E), Ledger purple (#A855F7), Next? lime (#84CC16), and Blue Variant / Tight Corridor blue (#0284C7) (reserved). Before this session, no document, code file, or memory system had this map — each new product had to independently decide its color. Now documented in three redundant locations (`iq-brand-system.md` §1, `guidelines.md` v3.0 §3, Claude Flow memory key `product-accent-color-map`).
+- **Downstream:** Future new iQ products have their accent colors pre-decided. Eliminates the iteration that iQ Publish went through (violet → coral → indigo). When Menu, Family Finance, Ledger, Next?, or Blue Variant is built as an app, creating its accent CSS file is a mechanical operation — no design decision needed.
+
+#### `KGiQ-LLC/branding/guidelines.md` v2.0 had fundamentally different design system values than the locker
+The guidelines doc used Tailwind Slate surfaces (canvas `#0f172a`, primary `#1e293b`) while the locker uses Apple-style neutral blacks (canvas `#000000`, primary `#1C1C1E`). It also used a completely different token namespace (`--brand-*`, `--surface-*`, `--bg-*`) compared to the locker's `--iq-*`. This isn't incidental drift — it's two design philosophies that were never reconciled during the v2.0 rebrand. Any agent reading guidelines.md for implementation guidance would produce visibly different UIs from what the locker's CSS would render.
+- **Downstream:** Resolved this session by rewriting guidelines.md to v3.0 with narrowed scope (brand identity only, no implementation). v3.0 is 386 lines (vs 624 for v2.0) and complements `iq-brand-system.md` with clean scope separation. Future updates: guidelines covers "who we are / how we look"; locker covers "how to build it." No overlap, no drift potential. Note: `parent-layer/kgiq-brand-guidelines.md` in the locker is a byte-for-byte copy and must be manually synced on every guidelines update until the iq-locker framework adds a sync pattern.
+
+#### Both iQ Booking and iQ Publish define typography utility classes (`.iq-title-1`, `.iq-display`, etc.) but neither app uses them
+Both apps' vendored `iq-typography.css` files carry the full set of utility classes (10 styles) that reference the font and size tokens, but components in both apps apply typography via inline `style` props referencing tokens directly. The utility classes are dead code.
+- **Downstream:** Non-blocking. `iq-brand-system.md` §4 documents this and recommends new apps adopt the utility classes. iQ Circle (the newest app) should use them from day one as a cleaner pattern. Existing apps could migrate during Phase E but it's not urgent.
+
+#### LINEAGE.md has robust write-time discoverability but weak read-time discoverability
+LINEAGE is well-wired as a write target: the MANIFEST's curation cadence rules say "record in LINEAGE" when adding an accent, and the promotion rules say "record in LINEAGE" when promoting a skill. But there's no equivalent routing for READ use cases — an agent doing Phase E migration wouldn't naturally find §3's consumer delta reports, and an agent investigating drift wouldn't find §2's reconciliation log. The MANIFEST referenced LINEAGE only generically ("see for audit history").
+- **Downstream:** Resolved this session by adding §6 "When to consult LINEAGE.md" to the MANIFEST with a situation → section routing table (consumer migration → §3, drift investigation → §2, etc.). Also added section-specific LINEAGE pointers to the `product-accents` and `kgiq-parent-brand` SKILLs. **Pattern worth codifying at the iq-locker framework level**: "every locker's MANIFEST should have a 'When to consult LINEAGE' section." Would benefit all future locker instances.
+
+#### All three product base logos use byte-identical iQ letterform coordinates
+iQ Booking, iQ Publish, and iQ Circle base wordmarks have the exact same SVG path data for the "iQ" element — only the dot `<circle>` element's `fill` color differs. This was verified during the Circle mark generation and confirmed again when back-filling Booking and Publish marks.
+- **Downstream:** Mark and favicon variants can be generated from any base wordmark by viewBox cropping + dot color substitution, with zero risk of geometric drift. Eliminates the need to manually derive mark geometry for new products. When future reserved products (Menu, Family Finance, etc.) get their base wordmarks authored in Figma, the mark/favicon set can be generated in minutes by copying the Circle pattern and substituting colors.
+
+#### iQ Publish base wordmarks had `#6366F2` instead of canonical `#6366F1` for the indigo dot
+One-digit drift between the logo files and the token system / accent CSS / brand guidelines. The panel doc `docs/history/2026-03-29-brand-cohesion-expert-panel.md` has the same typo (flagged in LINEAGE §5 D3).
+- **Downstream:** User corrected both SVGs in Figma mid-session; locker copies synced. The panel doc still has the typo but it's historical (no runtime impact, no files reference it for rendering). Low-priority footnote for next panel-doc edit if one happens; otherwise leave it as historical record.
+
+### Assumptions Validated
+
+- **[A3]** Skill locker pattern generalizes from vendored-upstream to self-authored content. → **further reinforced**. The locker absorbed a major consolidation (new canonical doc, archived legacy docs, reorganized directories) without breakage. Three-layer content model held up under expansion to four products.
+- **[A9]** Native Claude Code SKILL.md format is the correct content format. → **validated again**. All 7 active SKILLs were updated cleanly in-place with new routing.
+- **[A11]** Locker lives at `KGiQ-LLC/iq-design-locker/` and IS canonical. → **reinforced**. iQ Circle registration worked exactly as the framework anticipated.
+- **[A12]** LINEAGE.md backwards-looking provenance audit is a structural quality gate. → **validated with caveat**. Worked as a write target; read discoverability needed improvement (fixed this session via MANIFEST §6 and SKILL pointers). Worth codifying as framework pattern.
+- **[A-new from 2026-04-11]** Structural validation is a sufficient substitute for `npm test`. → **further reinforced**. No bugs escaped this session despite 30+ files touched across three repos.
+
+### Assumptions Invalidated
+
+None this session.
+
+### Open Questions
+
+1. **Should future new iQ products get accent CSS files created proactively (from the Figma map), or wait until an actual app needs them?** Leaning toward "wait — don't speculate on unused files." But the deterministic Figma map means the decision is trivially recoverable when the time comes.
+2. **Should the iq-locker framework codify "every MANIFEST should have a 'When to consult LINEAGE' section" as a pattern?** The discoverability improvement from §6 was meaningful and would benefit all future locker instances.
+3. **How should the locker handle its byte-for-byte copy of `branding/guidelines.md`?** Currently manual sync; options include symlinks, pointer docs, or a sync test. Not urgent but worth solving at the framework level before the next locker instance is built.
+4. **When Wave 6 Task 19 (spawn discoverability test) runs next session, should the success criteria be updated to verify the subagent finds `iq-brand-system.md` via SKILL routing?** The original criteria only mention MANIFEST and SKILL.md files. The new source-of-truth doc is a natural target to verify.
