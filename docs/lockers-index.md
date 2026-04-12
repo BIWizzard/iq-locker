@@ -23,7 +23,7 @@ Authoritative registry of locker instances built under the iq-locker framework. 
 
 | Field | Value |
 |-------|-------|
-| **Status** | `scoping` (Phase 0 complete, ready to start Phase A — extraction) |
+| **Status** | `validated` — Built 2026-04-11 (Waves 1-4, 18 tasks), consolidated 2026-04-12 (single-source-of-truth detour), Wave 5+6 wired + empirical spawn discoverability test **passed first try** 2026-04-12. Will flip to `live` after first Phase E consumer migration. |
 | **Home** | `/Users/kmgdev/KGiQ-LLC/iq-design-locker/` |
 | **Scope** | IQ brand, design tokens (colors, surfaces, spacing, radius, shadows), typography (three-font stack: Plus Jakarta Sans / Inter / JetBrains Mono), canonical component set, motion system, voice and tone, dot-as-signature product accent system, tech-nerd aesthetic, KGiQ parent brand layer (logos, palette, tagline) |
 | **Canonical source status** | **This locker IS the canonical source.** Before its creation, no single canonical source existed — three drifted copies of `iq-tokens.css` were scattered across booking-module, iq-publish, and portfolio-front-end, each with different product accents baked in. The locker consolidates these, fixes the drift, and becomes the authoritative home. |
@@ -32,7 +32,7 @@ Authoritative registry of locker instances built under the iq-locker framework. 
 | **Design audit** | `docs/plans/iq-design-system-brand-audit.md` (in this project) — five-project filesystem survey + Neon memory query + expert panel review findings + build plan |
 | **Build plan** | Phases A (extract + canonicalize) → B (backwards-looking audit + `LINEAGE.md`) → C (wrap in SKILL.md) → D (discover + wire) → E (reconcile consumer projects). Details in the brand audit doc. |
 | **Session history** | Will accumulate under `docs/sessions/` in this project — every iq-design-locker session (design, build, maintenance, reconciliation) is logged here, not in KGiQ-LLC. |
-| **LINEAGE.md** | Not yet created; will live at `KGiQ-LLC/iq-design-locker/LINEAGE.md` after Phase B |
+| **LINEAGE.md** | `KGiQ-LLC/iq-design-locker/LINEAGE.md` — 8 sections: (1) per-file provenance, (2) drift reconciliation, (3) consumer-project delta report, (4) completeness check, (5) spec verification, (6) quality-gate history, (7) 2026-04-12 reorganization + brand system consolidation (incl. §7.9 path resolution table), (8) Wave 5-6 completion + spawn discoverability test. |
 | **First-instance pick rationale** | Zero Claude Flow overlap; content is stable and cross-project; the "where is canonical?" problem is the clearest justification for building it; acts as the first real validation of the iq-locker framework on self-authored (not vendored-third-party) content. |
 | **Started** | 2026-04-10 |
 

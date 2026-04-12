@@ -5,6 +5,27 @@
 **Purpose:** Consolidate the canonical IQ design system knowledge scattered across five existing projects into a single reference, so we can design the first-instance iq-locker instance on empirical ground truth rather than guesses.
 **Method:** Five parallel Explore subagents surveyed `/Users/kmgdev/KGiQ-LLC`, `portfolio-front-end`, `booking-module`, `iq-publish`, and `upwork`. Each reported design tokens, components, brand docs, voice signals, code patterns, and the canonical-vs-project-specific split. Supplemented by a Claude Flow memory search (empty — fresh project namespace).
 
+---
+
+> ## AS-BUILT POINTER (2026-04-12) — CURRENT STATE DOCUMENTED ELSEWHERE
+>
+> This is the **pre-build rationale** dated 2026-04-10. It describes the state of iQ branding before the locker was built and contains framings that are now obsolete:
+>
+> - **Three product accents** (kgiq/publish/booking) → **now four** (`iq-accent-circle.css` added 2026-04-12 for iQ Circle; rose `#EC4899`)
+> - **`docs/iq-design-system-spec.md`, `docs/iq-design-system-brief.md`, and `docs/iq-components-guide.md`** as canonical references → **archived to `docs/history/`** on 2026-04-12, superseded by `docs/iq-brand-system.md`
+> - **`parent-layer/logos/KGiQ-*.svg`** (PascalCase) and **`KGiQ-LLC/branding/logos/iQ Brand-Logos/`** → **reorganized** to `logos/{kgiq,products,icons}/` with kebab-case naming
+> - **`KGiQ-LLC/branding/guidelines.md` v2.0** → **rewritten to v3.0** (brand identity only, 386 lines)
+> - **Pre-decided base = iq-publish** → **reversed at Wave 2 runtime** to booking-module (iq-publish had hardcoded `--iq-color-info: #3B82F6`)
+>
+> **For current locker state, consult:**
+> - `docs/plans/iq-design-system-build-plan.md` (as-built amendment at top of file has the full delta)
+> - `KGiQ-LLC/iq-design-locker/LINEAGE.md` §7 (2026-04-12 reorganization record; §7.9 path resolution table)
+> - `KGiQ-LLC/iq-design-locker/docs/iq-brand-system.md` (single source of truth for implementation)
+>
+> This audit remains valuable as a historical record of how we arrived at the build plan and of the drift discoveries that motivated it. **Do not use any file path, token name, accent count, or directory structure from this doc as ground truth for action today.**
+
+---
+
 ## Headline finding
 
 **The IQ design system already has a canonical source, and it is mature and well-documented.** The work for the iq-locker first-instance locker is not *authoring* a design system — it's *curating, wrapping, and teaching agents where the canonical content lives*.

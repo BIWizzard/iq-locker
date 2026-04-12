@@ -148,7 +148,7 @@ These are real candidates, not commitments. Evaluate each against: *is content d
 | 0. Synthesis & scoping | in progress | 2026-04-10 | This brief |
 | 1. Brainstorm & pick first-instance locker | pending | — | Decision on MVP locker target + rough design |
 | 1. First-instance locker picked | **complete** | 2026-04-10 | **IQ Design System**, will live at `KGiQ-LLC/iq-design-locker/`. See `docs/plans/iq-design-system-brand-audit.md` |
-| 2. Build first-instance locker (IQ Design System at KGiQ-LLC) | pending | — | Working locker + `LINEAGE.md` backwards-looking audit + validation spawn test. Phases A–D detailed in the brand audit doc. |
+| 2. Build first-instance locker (IQ Design System at KGiQ-LLC) | **complete** | 2026-04-10 → 2026-04-12 | Working locker at `KGiQ-LLC/iq-design-locker/` — 7 active + 1 dormant skills, 4 product accents (kgiq/booking/publish/circle), `docs/iq-brand-system.md` single source of truth (508 lines), full logo set across 4 products, `LINEAGE.md` with 8 sections incl. §7 reorganization + §8 Wave 5-6 completion. Spawn discoverability test **passed first try** 2026-04-12 from a blank-slate subagent in KGiQ-LLC. 3 content gaps surfaced by the test → tracked in `docs/plans/2026-04-12-locker-gap-closure.md`. See `docs/sessions/2026-04-{10,11,12}*.md`. |
 | 3. Reconcile consumer projects against the canonical locker | pending | — | Each consumer project (iq-publish, booking-module, portfolio-front-end) replaces its stray copies with locker-vendored files |
 | 4. Extract reusable framework scaffolding | pending | — | Template / init pattern for additional projects (reference implementation: T3 Hearst `fabric-toolkit`) |
 
