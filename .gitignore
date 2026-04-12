@@ -1,0 +1,39 @@
+# Claude Code / Claude Flow tooling
+.claude/
+.claude-flow/
+.mcp.json
+.superpowers/
+.swarm/
+
+# Runtime databases
+ruvector.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+
+# Temporary files
+*.tmp
+*.temp
+~$*
+
+# Secrets — NEVER commit
+.env
+.env.*
+*.pem
+*.key
+credentials.json
+secrets.json
